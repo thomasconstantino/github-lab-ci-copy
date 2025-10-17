@@ -1,0 +1,45 @@
+name: CI Pipeline
+
+on: [push, pull_request]
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+      - run: pip install -r requirements.txt
+      - name: Run Unit Tests
+        run: PYTHONPATH=. pytest tests/test_1_unit.py
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    needs: unit-tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+      - run: pip install -r requirements.txt
+      - name: Run Integration Tests
+        run: PYTHONPATH=. pytest tests/test_2_integration.py
+
+  e2e-tests:
+    runs-on: ubuntu-latest
+    needs: integration-tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.9'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Build Docker image
+        run: docker build -t mlapp .
+      - name: Run container
+        run: docker run -d -p 8000:8000 mlapp
+      - run: sleep 10
+      - name: Run E2E test
+        run: PYTHONPATH=. pytest tests/test_3_e2e.py

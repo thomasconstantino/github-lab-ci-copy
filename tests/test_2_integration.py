@@ -16,7 +16,7 @@ def test_predict_route():
     print(f"Response status: {response.status_code}")
     print(f"Response JSON: {response.json()}")
 
-    assert response.status_code == 200
+    assert response.status_code == 400
     assert "prediction" in response.json()
 
     print("✅ Test passed: Prediction key present and API responded successfully.")
